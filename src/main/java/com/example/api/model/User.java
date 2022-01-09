@@ -29,7 +29,7 @@ public class User{
 
     @NotBlank
     @Email
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
 
     private String password;
@@ -99,5 +99,9 @@ public class User{
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public List<String> getRoles(){
+        return List.of("USER");
     }
 }

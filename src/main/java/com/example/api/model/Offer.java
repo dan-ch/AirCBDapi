@@ -1,5 +1,6 @@
 package com.example.api.model;
 
+import com.example.api.dto.Ratings;
 import com.fasterxml.jackson.annotation.*;
 import org.hibernate.validator.constraints.Length;
 
@@ -7,7 +8,6 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Objects;
 
 @Entity
 @Table(name = "offers")
