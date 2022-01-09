@@ -25,5 +25,9 @@ public class UserService{
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
+    public Boolean existsByEmail(String email){
+        return userRepository.existsByEmail(email);
+    }
+
 
 }

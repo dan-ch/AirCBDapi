@@ -4,6 +4,8 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.example.api.exception.JwtAuthenticationException;
+import com.example.api.util.JwtTokenUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -22,18 +24,22 @@ import java.util.*;
 
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
+  private JwtTokenUtil jwtTokenUtil;
+
+  public JwtAuthorizationFilter(JwtTokenUtil jwtTokenUtil) {
+    this.jwtTokenUtil = jwtTokenUtil;
+  }
+
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-    if(request.getServletPath().equals("/login") || request.getServletPath().equals("/register"))
+    if(request.getServletPath().startsWith("/auth"))
       filterChain.doFilter(request, response);
 
     String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
     if(authorizationHeader != null && authorizationHeader.startsWith("Bearer ")){
       try{
         String token = authorizationHeader.substring("Bearer ".length());
-        Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
-        JWTVerifier verifier = JWT.require(algorithm).build();
-        DecodedJWT decodedJWT = verifier.verify(token);
+        DecodedJWT decodedJWT = jwtTokenUtil.decodeJWT(token);
         String email = decodedJWT.getSubject();
         String[] roles = decodedJWT.getClaim("roles").asArray(String.class);
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
@@ -44,14 +50,8 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             new UsernamePasswordAuthenticationToken(email, null, authorities);
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
       }catch (Exception e){
-        response.setStatus(HttpStatus.FORBIDDEN.value());
-        Map<String, String> error = new HashMap<>();
-        error.put("error_message", e.getMessage());
-        error.put("code", String.valueOf(HttpStatus.FORBIDDEN.value()));
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        new ObjectMapper().writeValue(response.getOutputStream(), error);
+        throw new JwtAuthenticationException("Something was wrong with the token");
       }
-
     }else
       filterChain.doFilter(request, response);
   }

@@ -4,80 +4,101 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.example.api.dto.LoginRequest;
+import com.example.api.dto.RegisterRequest;
 import com.example.api.exception.IllegalProcessingException;
+import com.example.api.exception.JwtAuthenticationException;
 import com.example.api.exception.TokenNotFoundException;
-import com.example.api.model.User;
 import com.example.api.service.UserService;
+import com.example.api.util.JwtTokenUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @IllegalProcessingException
+@RequestMapping("/auth")
 public class AuthController {
 
   private final PasswordEncoder passwordEncoder;
   private final UserService userService;
+  private final JwtTokenUtil jwtTokenUtil;
+  private final AuthenticationManager authenticationManager;
 
   @Autowired
-  public AuthController(PasswordEncoder passwordEncoder, UserService userService) {
+  public AuthController(PasswordEncoder passwordEncoder, UserService userService, JwtTokenUtil jwtTokenUtil, AuthenticationManager authenticationManager) {
     this.passwordEncoder = passwordEncoder;
     this.userService = userService;
+    this.jwtTokenUtil = jwtTokenUtil;
+    this.authenticationManager = authenticationManager;
   }
 
   @PostMapping("/register")
-  public ResponseEntity<?> register(@Valid User user){
-    user.setPassword(passwordEncoder.encode(user.getPassword()));
+  public void register(@Valid RegisterRequest requestData, HttpServletRequest request,
+                                    HttpServletResponse response) throws IOException {
+    if(userService.existsByEmail(requestData.getEmail()))
+      throw new IllegalArgumentException("User with given email already exists");
+    com.example.api.model.User user  = new com.example.api.model.User(requestData.getFirstName(),
+        requestData.getLastName(), requestData.getEmail(), passwordEncoder.encode(requestData.getPassword()));
     userService.addUser(user);
-    return ResponseEntity.ok("Registered");
+    attemptLogin(requestData.getEmail(), requestData.getPassword(), request, response);
+  }
+
+  @PostMapping("/login")
+  public void login(LoginRequest loginData, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    attemptLogin(loginData.getEmail(), loginData.getPassword(), request, response);
   }
 
   @GetMapping("/refresh-token")
   public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
     String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-    if(authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+    if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
       try {
-        String refresh_token = authorizationHeader.substring("Bearer ".length());
-        Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
-        JWTVerifier verifier = JWT.require(algorithm).build();
-        DecodedJWT decodedJWT = verifier.verify(refresh_token);
+        String refreshToken = authorizationHeader.substring("Bearer ".length());
+        DecodedJWT decodedJWT = jwtTokenUtil.decodeJWT(refreshToken);
         String email = decodedJWT.getSubject();
-        User user = userService.getUserByEmail(email);
-        String access_token = (JWT.create()
-            .withSubject(user.getEmail())
-            .withExpiresAt(new Date(System.currentTimeMillis()  + 10 * 60 * 1000))
-            .withIssuer(request.getRequestURL().toString())
-            .withClaim("roles", user.getRoles()))
-            .sign(algorithm);
-
-        Map<String, String> tokens = new HashMap<>();
-        tokens.put("access_token", access_token);
-        tokens.put("refresh_token", refresh_token);
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        new ObjectMapper().writeValue(response.getOutputStream(), tokens);
+        com.example.api.model.User user = userService.getUserByEmail(email);
+        String accessToken = jwtTokenUtil.createAccessToken(user, request.getRequestURL().toString());
+        tokenResponse(accessToken, refreshToken, response);
       } catch (Exception e) {
-        response.setStatus(HttpStatus.FORBIDDEN.value());
-        Map<String, String> error = new HashMap<>();
-        error.put("error_message", e.getMessage());
-        error.put("code", String.valueOf(HttpStatus.FORBIDDEN.value()));
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        new ObjectMapper().writeValue(response.getOutputStream(), error);
+        throw new JwtAuthenticationException("Something was wrong with the token");
       }
     }
-    throw new TokenNotFoundException("Send token has been expire");
+    throw new TokenNotFoundException("No token found");
+  }
+
+  private void attemptLogin(String email, String password, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    UsernamePasswordAuthenticationToken authenticationToken =
+        new UsernamePasswordAuthenticationToken(email, password);
+    User user = (User) authenticationManager.authenticate(authenticationToken).getPrincipal();
+    String accessToken = jwtTokenUtil.createAccessToken(user, request.getRequestURL().toString());
+    String refreshToken = jwtTokenUtil.createRefreshToken(user.getUsername(), request.getRequestURL().toString());
+    tokenResponse(accessToken, refreshToken, response);
+  }
+
+  private void tokenResponse(String accessToken, String refreshToken, HttpServletResponse response) throws IOException {
+    Map<String, String> tokens = new HashMap<>();
+    tokens.put("access_token", accessToken);
+    tokens.put("refresh_token", refreshToken);
+    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    new ObjectMapper().writeValue(response.getOutputStream(), tokens);
   }
 }
 

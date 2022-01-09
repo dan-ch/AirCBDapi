@@ -1,6 +1,7 @@
 package com.example.api.controller;
 
 import com.example.api.exception.IllegalProcessingException;
+import com.example.api.exception.JwtAuthenticationException;
 import com.example.api.exception.TokenNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,11 @@ public class IllegalExceptionControllerAdvice {
     @ExceptionHandler(TokenNotFoundException.class)
     ResponseEntity<String> handleTokenExpireException(TokenNotFoundException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+    }
+
+    @ExceptionHandler(JwtAuthenticationException.class)
+    ResponseEntity<String> handleTokenExpireException(JwtAuthenticationException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
     }
 
     @ExceptionHandler
