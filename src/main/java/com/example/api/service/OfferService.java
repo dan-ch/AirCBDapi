@@ -1,5 +1,6 @@
 package com.example.api.service;
 
+import com.example.api.exception.ResourceNotFoundException;
 import com.example.api.model.Offer;
 import com.example.api.model.Opinion;
 import com.example.api.model.Reservation;
@@ -44,39 +45,29 @@ public class OfferService {
 
     public Offer getOffer(Long offerId) {
         Optional<Offer> optionalOffer = offerRepository.findById(offerId);
-        return optionalOffer.orElseThrow(() -> new IllegalArgumentException("Offer not Found"));
+        return optionalOffer.orElseThrow(() -> new ResourceNotFoundException("Offer not Found"));
     }
 
     public Offer getOfferWithRatings(Long offerId) {
-        Optional<Offer> optionalOffer = offerRepository.findById(offerId);
-        if(optionalOffer.isPresent()){
-            Offer offer = optionalOffer.get();
-            offer.setRatings(offerRepository.getRatingsByOfferId(offerId));
-            return offer;
-        }
-        throw new IllegalArgumentException("Offer not Found");
+        Offer offer = getOffer(offerId);
+        offer.setRatings(offerRepository.getRatingsByOfferId(offerId));
+        return offer;
     }
 
     public User getOfferOwner(Long offerId) {
-        Optional<Offer> optionalOffer = offerRepository.findById(offerId);
-        if(optionalOffer.isPresent())
-            return optionalOffer.get().getOwner();
-        throw new IllegalArgumentException("Offer not Found");
+        Offer offer = getOffer(offerId);
+        return offer.getOwner();
     }
 
     public List<Reservation> getOfferReservations(Long offerId, Boolean current){
-        Offer offer = offerRepository.findById(offerId)
-                .orElseThrow(() -> new IllegalArgumentException("Offer not Found"));
         if(current)
             return reservationRepository.findByOffer_IdAndStartDateGreaterThanEqual(offerId, LocalDate.now());
-        return offer.getReservations();
+        return getOffer(offerId).getReservations();
     }
 
     public List<Opinion> getOfferOpinions(Long offerId) {
-        Optional<Offer> optionalOffer = offerRepository.findById(offerId);
-        if(optionalOffer.isPresent())
-            return optionalOffer.get().getOpinions();
-        throw new IllegalArgumentException("Offer not Found");
+        Offer offer = getOffer(offerId);
+        return offer.getOpinions();
     }
 
     public Offer addOffer(Offer offer){
@@ -84,18 +75,25 @@ public class OfferService {
         return offerRepository.save(offer);
     }
 
-    public void editOffer(Offer requestedOffer){
-        offerRepository.findById(requestedOffer.getId()).map(offer -> {
+    public Offer editOffer(Offer requestedOffer, User principal){
+        Offer offer = getOffer(requestedOffer.getId());
+        if(offer.getOwner()==principal){
             offer.setTitle(requestedOffer.getTitle());
             offer.setCity(requestedOffer.getCity());
             offer.setMaxPeople(requestedOffer.getMaxPeople());
             offer.setDailyPrice(requestedOffer.getDailyPrice());
             return offerRepository.save(offer);
-        }).orElseThrow(() -> new IllegalArgumentException("Offer not found"));
+        }
+        else
+            throw new IllegalStateException("No permission to perform action");
     }
 
-    public void deleteOffer(Long offerId){
-        offerRepository.deleteById(offerId);
+    public void deleteOffer(Long offerId, User principal){
+        Offer offer = getOffer(offerId);
+        if(offer.getOwner()==principal)
+            offerRepository.deleteById(offerId);
+        else
+            throw new IllegalStateException("No permission to perform action");
     }
 
     private List<Offer> filterAvailableOffers(List<Offer> offers, LocalDate startDate, LocalDate endDate){

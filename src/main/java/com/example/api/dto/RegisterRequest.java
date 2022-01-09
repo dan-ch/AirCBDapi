@@ -1,5 +1,7 @@
 package com.example.api.dto;
 
+import com.example.api.annotation.Password;
+
 import javax.validation.constraints.Email;
 
 public class RegisterRequest {
@@ -8,6 +10,7 @@ public class RegisterRequest {
   private String email;
   private String firstName;
   private String lastName;
+  @Password
   private String password;
 
   public RegisterRequest() {

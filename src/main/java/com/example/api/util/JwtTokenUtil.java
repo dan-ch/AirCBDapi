@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @Component
 public class JwtTokenUtil {
 
-  private static final Integer ACCESS_TOKEN_EXPIRE = 300000;
+  private static final Integer ACCESS_TOKEN_EXPIRE = 36000000; //3600000-godzina
   private static final Integer REFRESH_TOKEN_EXPIRE = 648000000;
   private Algorithm algorithm;
   private JWTVerifier verifier;

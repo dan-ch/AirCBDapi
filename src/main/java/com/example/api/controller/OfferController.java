@@ -5,8 +5,8 @@ import com.example.api.model.Offer;
 import com.example.api.model.Opinion;
 import com.example.api.model.Reservation;
 import com.example.api.model.User;
-import com.example.api.repository.UserRepository;
 import com.example.api.service.OfferService;
+import com.example.api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -24,13 +24,12 @@ import java.util.List;
 public class OfferController {
 
     private final OfferService offerService;
+    private final UserService userService;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    public OfferController(OfferService offerService) {
+    public OfferController(OfferService offerService, UserService userService) {
         this.offerService = offerService;
+        this.userService = userService;
     }
 
     @GetMapping(produces = "application/json")
@@ -69,22 +68,21 @@ public class OfferController {
 
     @PostMapping()
     public ResponseEntity<?> addOffer(@Valid Offer offer, Principal principal){
-        offer.setOwner(userRepository.getById(1L)); //TODO zmienić na principal
+        offer.setOwner(userService.getUserByEmail(principal.getName())); //TODO zmienić na principal
         Offer savedOffer = offerService.addOffer(offer);
         return ResponseEntity.created(URI.create("/offer/" + savedOffer.getId())).build();
     }
 
     @RequestMapping(method = {RequestMethod.PUT, RequestMethod.PATCH}, path = "/{id}")
-    public ResponseEntity<?> updateOffer(@Valid Offer offer, Principal principal){
-        // TDO sprawdzić czy principal id jest zgodny
-        offerService.editOffer(offer);
+    public ResponseEntity<?> updateOffer(@Valid Offer offer, @PathVariable Long id, Principal principal){
+        offer.setId(id);
+        offerService.editOffer(offer, userService.getUserByEmail(principal.getName()));
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteOffer(@PathVariable Long id, Principal principal){
-        // TDO sprawdzić czy principal id jest zgodny
-        offerService.deleteOffer(id);
+        offerService.deleteOffer(id, userService.getUserByEmail(principal.getName()));
         return ResponseEntity.noContent().build();
     }
 

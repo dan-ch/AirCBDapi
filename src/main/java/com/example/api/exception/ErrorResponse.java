@@ -1,22 +1,22 @@
 package com.example.api.exception;
 
 public class ErrorResponse {
-    private String message;
+    private String error_message;
 
     private int code;
 
     public ErrorResponse(String message, int code) {
         this.code = code;
-        this.message = message;
+        this.error_message = message;
     }
 
     public ErrorResponse(String message) {
-        this.message = message;
+        this.error_message = message;
         this.code = 404;
     }
 
     public String getMessage() {
-        return message;
+        return error_message;
     }
 
     public int getCode() {

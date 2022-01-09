@@ -18,6 +18,13 @@ public class Offer {
         INACTIVE
     }
 
+    public enum OfferType{
+        APARTMENT,
+        HOME,
+        HOSTEL,
+        HOTEL
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -38,6 +45,9 @@ public class Offer {
     @Enumerated(EnumType.STRING)
     private OfferStatus status;
 
+    @Enumerated(EnumType.STRING)
+    private OfferType type;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JsonBackReference
     private User owner;
@@ -50,8 +60,6 @@ public class Offer {
     @JsonBackReference
     private List<Opinion> opinions;
 
-
-    // TODO rating albo zamienić na customowy
     @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Ratings ratings;
@@ -138,5 +146,13 @@ public class Offer {
 
     public void setRatings(Ratings ratings) {
         this.ratings = ratings;
+    }
+
+    public OfferType getType() {
+        return type;
+    }
+
+    public void setType(OfferType type) {
+        this.type = type;
     }
 }
