@@ -1,28 +1,54 @@
 package com.example.api.controller;
 
+import com.example.api.model.Image;
 import com.example.api.model.Offer;
-import com.example.api.model.Opinion;
-import com.example.api.model.Reservation;
-import com.example.api.model.User;
-import com.example.api.repository.OfferRepository;
-import com.example.api.repository.OpinionRepository;
-import com.example.api.repository.ReservationRepository;
-import com.example.api.repository.UserRepository;
-import com.github.javafaker.Faker;
+import com.example.api.service.PhotoUploadService;
+import com.example.api.service.OfferService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
-import java.time.Month;
+import javax.validation.Valid;
+import java.io.IOException;
 import java.util.*;
 
 @RestController
-@RequestMapping("/")
+@CrossOrigin(origins = "*")
 public class HomeController {
 
-    // TODO lista miast
+  private final OfferService offerService;
+
+  @Autowired
+  private PhotoUploadService photoUploadService;
+
+  public HomeController(OfferService offerService) {
+    this.offerService = offerService;
+  }
+
+  @GetMapping("/cities")
+  public ResponseEntity<List<String>> getCities(){
+    return ResponseEntity.ok(offerService.getOfferCities());
+  }
+
+
+//  @GetMapping("/upload")
+//  public ResponseEntity<?> upload() throws IOException {
+//    String path = fileUploadService.uploadFile("folder");
+//    return ResponseEntity.ok(path);
+//  }
+//
+//  @PostMapping("/upload")
+//  public void upload(@Valid Offer offer, @RequestParam MultipartFile[] photos) throws IOException {
+//    Image image = photoUploadService.uploadPhoto(photos[0]);
+//    System.out.println("halo");
+//  }
+//
+  @GetMapping("/delete")
+  public void delete() throws Exception {
+    photoUploadService.deletePhoto("sda");
+  }
+
 
 //    private UserRepository userRepository;
 //    private OfferRepository offerRepository;

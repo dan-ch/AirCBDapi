@@ -1,16 +1,17 @@
 package com.example.api.service;
 
 import com.example.api.exception.ResourceNotFoundException;
-import com.example.api.model.Offer;
-import com.example.api.model.Opinion;
-import com.example.api.model.Reservation;
-import com.example.api.model.User;
+import com.example.api.model.*;
 import com.example.api.repository.OfferRepository;
 import com.example.api.repository.ReservationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
+import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -21,12 +22,14 @@ public class OfferService {
     private final OfferRepository offerRepository;
     private final ReservationRepository reservationRepository;
     private final DateService dateService;
+    private final PhotoUploadService photoUploadService;
 
     @Autowired
-    public OfferService(OfferRepository offerRepository, ReservationRepository reservationRepository, DateService dateService) {
+    public OfferService(OfferRepository offerRepository, ReservationRepository reservationRepository, DateService dateService, PhotoUploadService photoUploadService) {
         this.offerRepository = offerRepository;
         this.reservationRepository = reservationRepository;
         this.dateService = dateService;
+        this.photoUploadService = photoUploadService;
     }
 
     public List<Offer> getAvailableOffersByCityName(String city, LocalDate startDate, LocalDate endDate) {
@@ -70,7 +73,18 @@ public class OfferService {
         return offer.getOpinions();
     }
 
-    public Offer addOffer(Offer offer){
+    public Offer addOffer(Offer offer, MultipartFile[] photos){
+        List<Image> images = Arrays.stream(photos).map(photo -> {
+            try {
+                Image image = photoUploadService.uploadPhoto(photo);
+                image.setOffer(offer);
+                return image;
+            } catch (IOException e) {
+                throw new RuntimeException("Photo upload error");
+            }
+        }).collect(Collectors.toList());
+        offer.setMainImage(images.get(0));
+        offer.setImages(images.subList(1, images.size()));
         offer.setStatus(Offer.OfferStatus.ACTIVE);
         return offerRepository.save(offer);
     }
@@ -90,10 +104,27 @@ public class OfferService {
 
     public void deleteOffer(Long offerId, User principal){
         Offer offer = getOffer(offerId);
+        offer.getImages().stream()
+            .forEach(image -> {
+                try {
+                    photoUploadService.deletePhoto(image.getCloudId());
+                } catch (Exception e) {
+                    throw new RuntimeException("Photo deleting error");
+                }
+            });
         if(offer.getOwner()==principal)
             offerRepository.deleteById(offerId);
         else
             throw new IllegalStateException("No permission to perform action");
+    }
+
+    public List<String> getOfferCities(){
+        return offerRepository.getCities();
+    }
+
+    @Transactional
+    public void persistOffer(Offer offer, Image[] photos){
+
     }
 
     private List<Offer> filterAvailableOffers(List<Offer> offers, LocalDate startDate, LocalDate endDate){

@@ -19,4 +19,7 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
     @Query("select new com.example.api.dto.Ratings(count(o), avg(o.rate)) from Opinion o where o.offer.id = :id")
     Ratings getRatingsByOfferId(@Param("id") Long id);
 
+    @Query("select distinct o.city from Offer o")
+    List<String> getCities();
+
 }

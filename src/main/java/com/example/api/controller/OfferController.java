@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -67,9 +68,9 @@ public class OfferController {
     }
 
     @PostMapping()
-    public ResponseEntity<?> addOffer(@Valid Offer offer, Principal principal){
-        offer.setOwner(userService.getUserByEmail(principal.getName())); //TODO zmienić na principal
-        Offer savedOffer = offerService.addOffer(offer);
+    public ResponseEntity<?> addOffer(@Valid Offer offer, @RequestParam MultipartFile[] photos, Principal principal){
+        offer.setOwner(userService.getUserByEmail(principal.getName()));
+        Offer savedOffer = offerService.addOffer(offer, photos);
         return ResponseEntity.created(URI.create("/offer/" + savedOffer.getId())).build();
     }
 
