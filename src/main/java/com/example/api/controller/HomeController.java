@@ -1,20 +1,21 @@
 package com.example.api.controller;
 
-import com.example.api.model.Image;
-import com.example.api.model.Offer;
-import com.example.api.service.PhotoUploadService;
+import com.example.api.exception.IllegalProcessingException;
 import com.example.api.service.OfferService;
+import com.example.api.service.PhotoUploadService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
-import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @CrossOrigin(origins = "*")
+@IllegalProcessingException
 public class HomeController {
 
   private final OfferService offerService;
@@ -28,7 +29,9 @@ public class HomeController {
 
   @GetMapping("/cities")
   public ResponseEntity<List<String>> getCities(){
-    return ResponseEntity.ok(offerService.getOfferCities());
+    return ResponseEntity.ok()
+        .cacheControl(CacheControl.maxAge(60, TimeUnit.SECONDS))
+        .body(offerService.getOfferCities());
   }
 
 

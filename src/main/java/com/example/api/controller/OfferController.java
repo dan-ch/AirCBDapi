@@ -21,6 +21,7 @@ import java.util.List;
 
 @RestController
 @IllegalProcessingException
+@CrossOrigin(origins = "*")
 @RequestMapping("/offer")
 public class OfferController {
 

@@ -56,7 +56,7 @@ public class Offer {
   @JsonBackReference
   private User owner;
 
-  @OneToMany(fetch = FetchType.LAZY,
+  @OneToMany(fetch = FetchType.EAGER,
       mappedBy = "offer",
       cascade = CascadeType.ALL)
   @JsonBackReference

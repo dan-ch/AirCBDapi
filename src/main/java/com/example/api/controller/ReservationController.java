@@ -1,12 +1,14 @@
 package com.example.api.controller;
 
 
+import com.example.api.exception.IllegalProcessingException;
 import com.example.api.model.Reservation;
 import com.example.api.repository.UserRepository;
 import com.example.api.service.ReservationService;
 import com.example.api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,6 +18,8 @@ import java.security.Principal;
 
 @RestController
 @RequestMapping("/reservation")
+@CrossOrigin(origins = "*")
+@IllegalProcessingException
 public class ReservationController {
 
     private final ReservationService reservationService;
