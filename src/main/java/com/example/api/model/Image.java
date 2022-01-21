@@ -1,6 +1,7 @@
 package com.example.api.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -11,6 +12,7 @@ public class Image {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @JsonIgnore
   private Long id;
 
   @NotBlank
@@ -18,10 +20,11 @@ public class Image {
   private String url;
 
   @Column(nullable = false)
+  @JsonIgnore
   private String cloudId;
 
   @ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-  @JsonBackReference
+  @JsonIgnore
   private Offer offer;
 
   public Image() {

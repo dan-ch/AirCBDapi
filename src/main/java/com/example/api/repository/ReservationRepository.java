@@ -11,4 +11,6 @@ import java.util.List;
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
     List<Reservation> findByOffer_IdAndStartDateGreaterThanEqual(Long offerId, LocalDate date);
+
+    List<Reservation> findByOwnerEmail(String email);
 }

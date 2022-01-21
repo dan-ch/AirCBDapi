@@ -8,12 +8,10 @@ import com.example.api.service.ReservationService;
 import com.example.api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.net.URI;
 import java.security.Principal;
 
 @RestController
@@ -36,8 +34,14 @@ public class ReservationController {
 
     @PostMapping()
     public ResponseEntity<?> addReservation(@Valid Reservation reservation, Principal principal){
-        reservation.setOwner(userRepository.getById(1L)); //TODO powienien byc principal
-        reservationService.addReservation(reservation);
-        return null;
+        Reservation savedReservation = reservationService
+            .addReservation(reservation, userService.getUserByEmail(principal.getName()));
+        return  ResponseEntity.created(URI.create("/reservation/" + savedReservation.getId())).build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteReservation(@PathVariable Long id, Principal principal){
+        reservationService.deleteReservation(id, userService.getUserByEmail(principal.getName()));
+        return ResponseEntity.noContent().build();
     }
 }

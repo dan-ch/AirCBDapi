@@ -44,6 +44,10 @@ public class Offer {
   @NotNull
   private Integer dailyPrice;
 
+  @NotBlank
+  @Column(nullable = false, length = 2048)
+  private String description;
+
   @Enumerated(EnumType.STRING)
   private OfferStatus status;
 
@@ -76,7 +80,6 @@ public class Offer {
   @OneToMany(fetch = FetchType.LAZY,
       mappedBy = "offer",
       cascade = CascadeType.ALL)
-  @JsonBackReference
   private List<Image> images;
 
   @Transient
@@ -189,5 +192,13 @@ public class Offer {
 
   public void setImages(List<Image> images) {
     this.images = images;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
   }
 }

@@ -18,13 +18,13 @@ public class DateService {
         );
     }
 
-    public boolean isFirstDateRangeWithinSecondDateRange(LocalDate firstStartDate, LocalDate firstEndDate,
+    private boolean isFirstDateRangeWithinSecondDateRange(LocalDate firstStartDate, LocalDate firstEndDate,
                                                           LocalDate secondStartDate, LocalDate secondEndDate) {
         return (firstStartDate.isAfter(secondStartDate) && firstStartDate.isBefore(secondEndDate))
                 || (firstEndDate.isAfter(secondStartDate) && firstEndDate.isBefore(secondEndDate));
     }
 
-    public boolean isDateEqualToDates(LocalDate date, LocalDate datesFirst, LocalDate datesSecond){
+    private boolean isDateEqualToDates(LocalDate date, LocalDate datesFirst, LocalDate datesSecond){
         return date.isEqual(datesFirst) || date.isEqual(datesSecond);
     }
 }

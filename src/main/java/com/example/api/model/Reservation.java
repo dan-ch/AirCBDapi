@@ -28,16 +28,17 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private User owner;
 
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JsonBackReference
     private Offer offer;
 
+    @Column(nullable = false)
     private Integer price;
 
     @NotNull
