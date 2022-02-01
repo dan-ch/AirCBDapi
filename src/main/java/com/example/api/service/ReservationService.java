@@ -5,6 +5,9 @@ import com.example.api.model.Reservation;
 import com.example.api.model.User;
 import com.example.api.repository.ReservationRepository;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+
 import static java.time.temporal.ChronoUnit.DAYS;
 
 @Service
@@ -45,6 +48,9 @@ public class ReservationService {
 
     public void deleteReservation(Long reservationId, User principal){
         Reservation reservation = getReservation(reservationId);
+
+        if(reservation.getStartDate().isBefore(LocalDate.now()))
+            throw new IllegalStateException("Reservation cannot be deleted");
 
         if(reservation.getOwner()==principal)
             reservationRepository.deleteById(reservationId);

@@ -1,15 +1,13 @@
 package com.example.api.controller;
 
 import com.example.api.exception.IllegalProcessingException;
+import com.example.api.model.Offer;
 import com.example.api.model.Reservation;
 import com.example.api.model.User;
 import com.example.api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
@@ -17,6 +15,7 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 @IllegalProcessingException
 @RequestMapping("/user")
+@RestController
 public class UserController {
 
   private UserService userService;
@@ -39,5 +38,10 @@ public class UserController {
   @GetMapping("/reservation")
   public ResponseEntity<List<Reservation>> getUserPrincipalReservations(Principal principal){
     return ResponseEntity.ok(userService.getUserReservations(principal.getName()));
+  }
+
+  @GetMapping("/offer")
+  public ResponseEntity<List<Offer>> getUserOffers(Principal principal){
+    return ResponseEntity.ok(userService.getUserOffers(principal.getName()));
   }
 }

@@ -29,7 +29,7 @@ public class Reservation {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonManagedReference(value = "user-reservation")
+    @JsonBackReference(value = "user-reservation")
     private User owner;
 
     @Enumerated(EnumType.STRING)

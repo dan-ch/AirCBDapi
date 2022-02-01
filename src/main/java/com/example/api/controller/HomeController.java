@@ -1,6 +1,7 @@
 package com.example.api.controller;
 
 import com.example.api.exception.IllegalProcessingException;
+import com.example.api.model.Offer;
 import com.example.api.service.OfferService;
 import com.example.api.service.PhotoUploadService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,11 @@ public class HomeController {
     return ResponseEntity.ok()
         .cacheControl(CacheControl.maxAge(60, TimeUnit.SECONDS))
         .body(offerService.getOfferCities());
+  }
+
+  @GetMapping("/newest")
+  public ResponseEntity<List<Offer>> getNewOffers(){
+    return ResponseEntity.ok(offerService.getNewestOffers());
   }
 
 

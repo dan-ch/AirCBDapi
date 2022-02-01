@@ -96,6 +96,7 @@ public class OfferService {
             offer.setCity(requestedOffer.getCity());
             offer.setMaxPeople(requestedOffer.getMaxPeople());
             offer.setDailyPrice(requestedOffer.getDailyPrice());
+            offer.setDescription(requestedOffer.getDescription());
             return offerRepository.save(offer);
         }
         else
@@ -122,9 +123,8 @@ public class OfferService {
         return offerRepository.getCities();
     }
 
-    @Transactional
-    public void persistOffer(Offer offer, Image[] photos){
-
+    public List<Offer> getNewestOffers(){
+        return offerRepository.getNewest();
     }
 
     private List<Offer> filterAvailableOffers(List<Offer> offers, LocalDate startDate, LocalDate endDate){
@@ -138,7 +138,6 @@ public class OfferService {
                         }
                 ).collect(Collectors.toList());
     }
-
 }
 
 

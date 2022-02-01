@@ -22,4 +22,8 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
     @Query("select distinct o.city from Offer o")
     List<String> getCities();
 
+    @Query(nativeQuery = true, value = "select * from offers order by id desc limit 5")
+    List<Offer> getNewest();
+
+    List<Offer> getAllByOwnerEmail(String email);
 }
