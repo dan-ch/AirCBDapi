@@ -55,26 +55,30 @@ public class Offer {
   @Enumerated(EnumType.STRING)
   private OfferType type;
 
+  @Column(nullable = false)
+  @NotNull
+  private Boolean smoking;
+
   @ManyToOne(fetch = FetchType.LAZY,
       optional = false)
-  @JsonBackReference
+  @JsonBackReference("offer-owner")
   private User owner;
 
   @OneToMany(fetch = FetchType.EAGER,
       mappedBy = "offer",
       cascade = CascadeType.ALL)
-  @JsonBackReference
+  @JsonBackReference(value = "offer-reservation")
   private List<Reservation> reservations;
 
   @OneToMany(fetch = FetchType.LAZY,
       mappedBy = "offer",
       cascade = CascadeType.ALL)
-  @JsonBackReference()
+  @JsonBackReference(value = "offer-opinion")
   private List<Opinion> opinions;
 
   @OneToOne(fetch = FetchType.EAGER,
       cascade = CascadeType.ALL)
-  @JsonManagedReference
+  @JsonManagedReference(value = "offer-mainImage")
   private Image mainImage;
 
   @OneToMany(fetch = FetchType.LAZY,
@@ -200,5 +204,13 @@ public class Offer {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public Boolean getSmoking() {
+    return smoking;
+  }
+
+  public void setSmoking(Boolean smoking) {
+    this.smoking = smoking;
   }
 }

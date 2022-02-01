@@ -4,6 +4,7 @@ import com.example.api.exception.*;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -26,13 +27,13 @@ public class IllegalExceptionControllerAdvice {
             .body(new ErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value()));
     }
 
-    @ExceptionHandler(TokenNotFoundException.class)
-    ResponseEntity<ErrorResponse> handleTokenExpireException(TokenNotFoundException e) {
+    @ExceptionHandler({TokenNotFoundException.class, BadCredentialsException.class})
+    ResponseEntity<ErrorResponse> handleTokenExpireException(RuntimeException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
             .body(new ErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED.value()));
     }
 
-    @ExceptionHandler(JwtAuthenticationException.class)
+    @ExceptionHandler({JwtAuthenticationException.class, })
     ResponseEntity<ErrorResponse> handleTokenExpireException(JwtAuthenticationException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
             .body(new ErrorResponse(e.getMessage(), HttpStatus.FORBIDDEN.value()));

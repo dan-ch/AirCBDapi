@@ -41,7 +41,7 @@ public class User{
     private List<Offer> offers;
 
     @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
-    @JsonBackReference
+    @JsonBackReference(value = "user-reservation")
     private List<Reservation> reservations;
 
     public User(String firstName, String lastName, String email, String password) {
@@ -110,6 +110,7 @@ public class User{
         this.password = password;
     }
 
+    @JsonIgnore
     public List<String> getRoles(){
         return List.of("USER");
     }

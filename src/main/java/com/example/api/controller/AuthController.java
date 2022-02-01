@@ -16,10 +16,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.print.attribute.standard.Media;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -28,10 +28,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
+@CrossOrigin(origins = "*")
 @IllegalProcessingException
 @RequestMapping("/auth")
 @Validated
-@CrossOrigin(origins = "*")
 public class AuthController {
 
   private final PasswordEncoder passwordEncoder;
@@ -47,8 +47,8 @@ public class AuthController {
     this.authenticationManager = authenticationManager;
   }
 
-  @PostMapping("/register")
-  public void register(@Valid RegisterRequest requestData, HttpServletRequest request,
+  @PostMapping(value = "/register")
+  public void register(@RequestBody @Valid RegisterRequest requestData, HttpServletRequest request,
                        HttpServletResponse response) throws IOException {
     if(userService.existsByEmail(requestData.getEmail()))
       throw new IllegalArgumentException("User with given email already exists");
@@ -59,7 +59,7 @@ public class AuthController {
   }
 
   @PostMapping("/login")
-  public void login(LoginRequest loginData, HttpServletRequest request, HttpServletResponse response) throws IOException {
+  public void login(@RequestBody LoginRequest loginData, HttpServletRequest request, HttpServletResponse response) throws IOException {
     attemptLogin(loginData.getEmail(), loginData.getPassword(), request, response);
   }
 

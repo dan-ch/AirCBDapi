@@ -34,7 +34,6 @@ public class Opinion {
     private LocalDate date;
 
     @ManyToOne
-    @JsonBackReference
     private User author;
 
     public Opinion() {
