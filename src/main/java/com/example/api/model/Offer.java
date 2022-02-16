@@ -76,11 +76,6 @@ public class Offer {
   @JsonBackReference(value = "offer-opinion")
   private List<Opinion> opinions;
 
-  @OneToOne(fetch = FetchType.EAGER,
-      cascade = CascadeType.ALL)
-  @JsonManagedReference(value = "offer-mainImage")
-  private Image mainImage;
-
   @OneToMany(fetch = FetchType.LAZY,
       mappedBy = "offer",
       cascade = CascadeType.ALL)
@@ -92,14 +87,6 @@ public class Offer {
 
 
   public Offer() {
-  }
-
-  public Image getMainImage() {
-    return mainImage;
-  }
-
-  public void setMainImage(Image mainImage) {
-    this.mainImage = mainImage;
   }
 
   public Long getId() {

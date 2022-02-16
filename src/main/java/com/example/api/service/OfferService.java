@@ -83,8 +83,7 @@ public class OfferService {
                 throw new RuntimeException("Photo upload error");
             }
         }).collect(Collectors.toList());
-        offer.setMainImage(images.get(0));
-        offer.setImages(images.subList(1, images.size()));
+        offer.setImages(images);
         offer.setStatus(Offer.OfferStatus.ACTIVE);
         return offerRepository.save(offer);
     }
