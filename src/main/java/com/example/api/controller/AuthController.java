@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins = "*")
+@CrossOrigin
 @IllegalProcessingException
 @RequestMapping("/auth")
 @Validated

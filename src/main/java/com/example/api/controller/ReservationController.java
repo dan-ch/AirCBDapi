@@ -18,7 +18,7 @@ import java.security.Principal;
 
 @RestController
 @RequestMapping("/reservation")
-@CrossOrigin(origins = "*")
+@CrossOrigin
 @IllegalProcessingException
 public class ReservationController {
 

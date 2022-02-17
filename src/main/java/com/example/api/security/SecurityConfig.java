@@ -38,10 +38,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     http.cors().and().csrf().disable();
-    http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-    http.authorizeRequests().antMatchers("/offer/**", "/opinion/**", "/reservation/**", "/user/**").authenticated();
-    http.authorizeRequests().antMatchers("/auth/**", "/cities").permitAll();
     http.addFilterBefore(new JwtAuthorizationFilter(jwtTokenUtil), UsernamePasswordAuthenticationFilter.class);
+    http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    http.authorizeRequests().antMatchers("/offer/**", "/user/**", "/opinion/**", "/reservation/**").authenticated();
+    http.authorizeRequests().antMatchers("/cities", "/auth/**").permitAll();
   }
 
   @Bean

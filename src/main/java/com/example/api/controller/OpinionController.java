@@ -14,7 +14,7 @@ import java.security.Principal;
 @RestController
 @IllegalProcessingException
 @RequestMapping("/opinion")
-@CrossOrigin(origins = "*")
+@CrossOrigin
 public class OpinionController {
 
     private final OpinionService opinionService;

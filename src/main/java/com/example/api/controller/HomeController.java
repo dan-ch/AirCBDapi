@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @RestController
-@CrossOrigin(origins = "*")
+@CrossOrigin
 @IllegalProcessingException
 public class HomeController {
 
